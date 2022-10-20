@@ -5,13 +5,19 @@ using UnityEngine.SceneManagement;
 
 public class SaidaDeCena : MonoBehaviour
 {
+
+    public string reiniciarNivel = null;
     public string proximoNivel = null;
     public float LoadDelay = 3f;
     private float contador = 0f;
     private bool loadProximoNivel = false;
+    
+    
+   
     void Update()
     {
-        if(loadProximoNivel == true){
+        
+        if(loadProximoNivel == true||GameObject.Find("Player") == null){
             contador += Time.deltaTime;
             if(contador >= LoadDelay){
                 loadProximoNivel = false;

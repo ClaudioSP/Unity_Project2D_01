@@ -24,9 +24,7 @@ public class MoedaScript : MonoBehaviour
             moedaAudio.Play();
             GameObject.Find("Main Camera").GetComponent<GameBehaviour>().AddMoeda();
             ProntoPraRemover = true;
-            renderizar.enabled = false;
-            
-            
+            renderizar.enabled = false;   
         }
 
     }

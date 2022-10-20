@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+
+
 
 public class GameBehaviour : MonoBehaviour
 {
-   public int Moedas = 0;
+   public int moedas = 0;
    public bool jogoExecutando = true;
-
+   public Text MoedaTxt;
    void Start(){
       GameObject inicio = GameObject.Find("Inicio");
       if (inicio == null){
@@ -21,7 +24,10 @@ public class GameBehaviour : MonoBehaviour
 
 
          }
+        
    public void AddMoeda(){
-    Moedas++;
+    moedas++;
+    print(moedas);
+    MoedaTxt.text = moedas.ToString();
    }
 }

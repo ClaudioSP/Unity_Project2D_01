@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem; 
 using System;
 
 public class Player01 : MonoBehaviour
@@ -22,11 +23,13 @@ public class Player01 : MonoBehaviour
 
     bool isDead = false;
 
-    public float Velocidade = 4f;
+    public float Velocidade = 3f;
 
     public float jumpForce = 100f;
 
     SpriteRenderer renderer01;
+
+    Vector2 move;
 
     // Start e chamado antes da atualizacao do primeiro quadro
     void Start()
@@ -37,87 +40,99 @@ public class Player01 : MonoBehaviour
         animator = GetComponent<Animator>();
         renderer01 = GetComponent<SpriteRenderer>();
         colisorInferior = GetComponentsInChildren<PlayerColisor>()[0];
+        colisorInferior.OnTriggerEnterAction = delegate(Collider2D obj){
+            if (obj.CompareTag("PontoFraco")){
+                obj.GetComponentInParent<Enemy>().Morrer();
+                
+            }
+        };
         colisorFrontal = GetComponentsInChildren<PlayerColisor>()[1];
         colisorTraseiro = GetComponentsInChildren<PlayerColisor>()[2];
         
     }
 
     // Update e chamado uma vez por frame
-    void Update()
-    {
+    void FixedUpdate()
+    {   
 
-        if(jogo.jogoExecutando == false){
+        
+
+        if(jogo.jogoExecutando == false || this.isDead == true ){
             animator.SetFloat("Velocidade",0f);
             rb.velocity = new Vector2(0f,rb.velocity.y);
             return;
         }
+        Vector3 direction = new Vector3(move.x,0f,0f);
+        transform.position += direction*Time.deltaTime*Velocidade;
+        
+        if(direction[0] > 0){
+           
+            renderer01.flipX = false;
+            animator.SetFloat("Velocidade", 1);
 
-        Move();
+        }else if(direction[0] < 0){
+            animator.SetFloat("Velocidade", 1);
+            renderer01.flipX = true;
+
+        }else if(direction[0] == 0){
+            
+            animator.SetFloat("Velocidade", 0);
+            
+        }
+        //Move();
         
         isJumping = !colisorInferior.colidindo;
 
-        if (Input.GetButtonDown("Jump") && isJumping == false )
-        {  
-        Pulo();
-        }
+       
 
-        float velocidadeX = Math.Abs(this.rb.velocity.x);
+      //  float velocidadeX = Math.Abs(this.rb.velocity.x);
         
        
         
         animator.SetBool("Pulo", isJumping);
 
     }
-    void Move(){
-
-        Vector2 dir = Vector2.zero;
-        if (Input.GetKey(KeyCode.A) == true && colisorTraseiro.colidindo ==false)
-        {
-            dir.x = -1;
-        }
-        else if (Input.GetKey(KeyCode.D) == true && colisorFrontal.colidindo ==false)
-        {
-            dir.x = 1;
-        }
-      
-        Vector2 vel = rb.velocity;
-        vel.x = dir.x * Velocidade;
-        rb.velocity = vel;
-        animator.SetFloat("Velocidade", GetAbsVelocity());
-     
-        if (rb.velocity.x > 0)
-        {
-            renderer01.flipX = false;
-        }
-        else if (rb.velocity.x < 0)
-        {
-            renderer01.flipX = true;
-        }
-        float velocidadeX = Math.Abs(this.rb.velocity.x);
+    /*void Move(){
+        
         
 
+        
+        //transform.position += direction*Time.deltaTime*Velocidade;
 
-       /* Vector3 movimento = new Vector3(Input.GetAxis("Horizontal"),0f,0f);
-        transform.position += movimento*Time.deltaTime*Velocidade;
-        if(movimento[0] > 0){
-            renderer.flipX = false;
+        if(direction[0] > 0){
+           
+            renderer01.flipX = false;
+            animator.SetFloat("Velocidade", 1);
 
-        }else if(movimento[0] < 0){
-            renderer.flipX = true;
-        }*/
+        }else if(direction[0] < 0){
+            animator.SetFloat("Velocidade", 1);
+            renderer01.flipX = true;
+
+        }else if(direction[0] == 0){
+            
+            animator.SetFloat("Velocidade", 0);}
+
+    }*/
+    public void moveContext(InputAction.CallbackContext value){
+        move = value.ReadValue<Vector2>();
 
     }
 
-    private void Pulo() {
-		
-        rb.AddForce (new Vector2 (0, jumpForce),ForceMode2D.Impulse);
+    public void Pulo(InputAction.CallbackContext value) {
+
+		if(value.started && isJumping == false && colisorFrontal.colidindo == false){
+        
+        rb.AddForce (new Vector2 (0, jumpForce),ForceMode2D.Impulse); 
+        }
+        
         
         //rb.velocity = new Vector2 (rb.velocity.x, 0);
 		
 		
 	}
     float GetAbsVelocity()
-    {
+    {   
+        
         return Mathf.Abs(rb.velocity.x);
     }
 
@@ -129,5 +144,13 @@ public class Player01 : MonoBehaviour
     bool IsDead()
     {
         return isDead;
+    }
+    public void Morrer(){
+        if(this.isDead == false ){
+        this.isDead = true;
+        animator.SetBool("Morto",this.isDead);
+        Destroy(this.gameObject,1);
+    }
+    
     }
 }
